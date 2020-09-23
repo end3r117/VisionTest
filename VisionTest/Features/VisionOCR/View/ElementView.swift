@@ -64,11 +64,16 @@ extension ElementView {
 		deinit {
 			print("EVM - deinit - words: \(words.count)")
 		}
+        
+        func transformToGlobalCoord(from rect: CGRect, parent:CGRect) -> CGRect {
+            return CGRect(x: rect.origin.x, y: rect.origin.y + parent.origin.y, width:rect.width, height:rect.height)
+        }
 		
 		//TODO: Rects are not correct. Fix or toss function.
 		///Needs fix
-		func createWords(from element: VisionRecognizedTextResult, inRect rect: CGRect) {
+        func createWords(from element: VisionRecognizedTextResult, inRect rect: CGRect, parentRect: CGRect) {
 			print(element.string)
+            var totalWidth:CGFloat = 0.0
 			let trimmed = String(element.string).filter({ !" \n\t\r".contains($0) })
 			if wordBoundaries.isEmpty, rect != .zero {
 				let diff = trimmed.difference(from: element.string)
@@ -132,11 +137,12 @@ extension ElementView {
 
 									if var bound = String(str).boundingRect(forCharacterRange: nsRng, withFont: font, insideBoundingRect: rect) {
 //										if !(bound.width > 0.0) {
-										bound = CGRect(origin: CGPoint(x: idx == 0 ? rect.minX : bound.origin.x + (increment / 1), y: bound.origin.y), size: CGSize(width: max(CGFloat(nsRng.length + (nsRng.length > 3 ? 1 : 0)) * increment, bound.width), height: bound.height))
+										bound = CGRect(origin: CGPoint(x: totalWidth - rect.minX, y: bound.origin.y), size: CGSize(width: max(CGFloat(nsRng.length + (nsRng.length > 3 ? 1 : 0)) * increment, bound.width), height: bound.height))
 //											bound = CGRect(origin: bound.origin, size: CGSize(width: imgRect.width / CGFloat(nsRng.length), height: bound.height))
 //										}
-										print("Word,Rect=", str, bound, "\nFont: \(font.pointSize)")
-										words.append(Word(string: String(str), elementID: element.id, boundingRect: bound, font: font, estimatedCharWidth: increment))
+                                        totalWidth = totalWidth + bound.size.width
+                                        print("Word,Rect=", str, bound.minX, bound.maxY, "\nFont: \(font.pointSize)")
+										words.append(Word(string: String(str), elementID: element.id, boundingRect: transformToGlobalCoord(from:bound, parent: parentRect), font: font, estimatedCharWidth: increment))
 									}
 								}
 							}
@@ -147,7 +153,7 @@ extension ElementView {
 								if let index = words.firstIndex(where: { $0.elementID == element.id }) {
 									words.remove(at: index)
 								}
-								words.append(Word(string: element.string, elementID: element.id, boundingRect: rect, font: font, estimatedCharWidth: increment))
+                                words.append(Word(string: element.string, elementID: element.id, boundingRect: transformToGlobalCoord(from:rect, parent: parentRect), font: font, estimatedCharWidth: increment))
 								
 							}
 						}
@@ -179,14 +185,15 @@ struct ElementView: View {
 	@Binding var dragLocation: CGPoint
 	
 	@Binding var selectedRange: [VisionRecognizedTextResult.ID: (Word, CGFloat, CGFloat)]
-		
+    var elemBBox: CGRect
+    
 	var body: some View {
 		Rectangle()
 			.fill(Color.blue.opacity(0.005))
 			.anchorPreference(key: AnchorPreferenceKey<String>.self, value: .bounds) { [element.id:$0] }
 			.overlayPreferenceValue(AnchorPreferenceKey<String>.self) { value in
 				GeometryReader { proxy in
-					overlayWordViewsUsingPreferenceValue(value, geo: proxy)
+                    overlayWordViewsUsingPreferenceValue(value, geo: proxy, parentRect: elemBBox)
 				}
 			}
 //			.onChange(of: model.words) { value in
@@ -224,14 +231,14 @@ struct ElementView: View {
 	}
 
 		
-	func overlayWordViewsUsingPreferenceValue(_ value: AnchorPreferenceKey<String>.Value, geo: GeometryProxy) -> some View {
+    func overlayWordViewsUsingPreferenceValue(_ value: AnchorPreferenceKey<String>.Value, geo: GeometryProxy, parentRect:CGRect) -> some View {
 		var elementBounds: CGRect = .zero
 		
 		if let anchor = value[element.id] {
 			elementBounds = geo[anchor]
 			if model.words.isEmpty {
 				DispatchQueue.main.async {
-					model.createWords(from: element, inRect: elementBounds)
+					model.createWords(from: element, inRect: elementBounds, parentRect: parentRect)
 				}
 			}
 		}
@@ -335,6 +342,5 @@ struct ElementView: View {
 
 extension PreviewProvider {
 	static var imageNames: [String] { ["TestText", "ExamplePost"] }
-	static var visionVM: VisionViewModel { VisionViewModel(forPreviewProviderWithImage: UIImage(named: imageNames[0])) }
-}
+    static var visionVM: VisionViewModel { VisionViewModel(forPreviewProviderWithImage: UIImage(named: imageNames[0])) }}
 #endif
