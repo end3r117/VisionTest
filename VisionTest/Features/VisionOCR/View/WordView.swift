@@ -21,12 +21,12 @@ struct WordView: View {
 		Text(word.string)
 			.font(Font(font))
 			.foregroundColor(.clear)
+            .background(word.string == "stress," ? Color.red.opacity(0.2) : Color.clear)
 			.frame(minWidth: size.width, maxHeight: size.height)
-			.border(Color.purple)
+            .border(Color.purple)
 			.onChange(of: dragLocation, perform: { value in
 				guard value != .zero else { return }
 				let h = word.boundingRect.contains(value)
-				
 				word.highlighted = h
 				if h {
 					highlightRangeInX(word, word.boundingRect.minX, word.boundingRect.maxX)

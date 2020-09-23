@@ -283,7 +283,7 @@ struct TextRecognitionView: View {
 			if imageRect != .zero {
 				ForEach(results.indices, id: \.self) { idx in
 					let rect = results[idx].relativeBoundingBox(forImageFrame: imageRect)
-					
+              
 					ElementView(element: Binding(get: {
 						if model.vpImage?.textDisplayResults.indices.contains(idx) ?? false {
 							return (model.vpImage?.textDisplayResults[idx])!
@@ -294,9 +294,9 @@ struct TextRecognitionView: View {
 					}), elementSelected: Binding(get: {
 						checkHighlightForResultIndex(idx, boundingBox: rect)
 					}, set: {_ in}), dragLocation: Binding(get: {
-						CGPoint(x: dragLocation.x - rect.minX, y: dragLocation.y - rect.minY)
+						CGPoint(x: dragLocation.x, y: dragLocation.y)
 					}, set: {_ in })
-					, selectedRange: $highlightedWords)
+					, selectedRange: $highlightedWords,elemBBox: rect)
 					.frame(width: rect.width, height: rect.height)
 					.position(x: rect.midX, y: rect.midY)
 					.background(

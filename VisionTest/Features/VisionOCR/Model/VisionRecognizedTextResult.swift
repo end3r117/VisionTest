@@ -24,7 +24,7 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 	let topRight: CGPoint
 	let bottomLeft: CGPoint
 	let bottomRight: CGPoint
-		
+
 	let boundingBox: CGRect
 	
 //	var subElements: [SubElement] = []
@@ -42,10 +42,10 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 		self.string = candidate.string
 
 		self.bottomLeft = observation.bottomLeft
-		self.bottomRight = observation.bottomRight
+        self.bottomRight = observation.bottomRight
 		self.topRight = observation.topRight
 		self.topLeft = observation.topLeft
-		
+		        
 //		if let first = subElements.first, first.string == candidate.string {
 //			self.subElements = first.subElements
 //
@@ -53,8 +53,7 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 //			self.subElements = subElements
 //		}
 		
-		let rect = CGRect(x: topLeft.x, y: topLeft.y, width: topRight.x - bottomLeft.x, height: bottomRight.y - topLeft.y)
-		
+		let rect = CGRect(x: topLeft.x, y: topLeft.y, width: topRight.x - bottomLeft.x, height: topRight.y - bottomLeft.y)
 //		if rect.height > 0 && rect.width > 0 {
 			self.boundingBox = rect
 //		}
@@ -79,7 +78,6 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 	///Not sure if correct
 	func relativeBoundingBox(forImageFrame frame: CGRect) -> CGRect {
 		let r = CGRect(x: (topLeft.x * frame.width) + frame.minX, y: ((1 - topLeft.y) * frame.height) + frame.minY, width: boundingBox.width * frame.width, height: boundingBox.height * frame.height)
-//		print("Relative bounding box: \(r)")
 		return r
 	}
 	
