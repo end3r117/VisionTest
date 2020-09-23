@@ -8,6 +8,7 @@
 import Vision
 import SwiftUI
 
+///UNUSED
 struct SubElementView: View {
 	typealias SubElement = VisionRecognizedTextResult.SubElement
 	@Binding var subElement: SubElement

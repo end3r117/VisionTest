@@ -10,7 +10,7 @@ import Vision
 
 struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 	static func == (lhs: VisionRecognizedTextResult, rhs: VisionRecognizedTextResult) -> Bool {
-		lhs.id == rhs.id || (lhs.boundingBox == rhs.boundingBox && lhs.imageID == rhs.imageID && lhs.subStringsConc == rhs.subStringsConc && lhs.string == rhs.string)
+		lhs.id == rhs.id || (lhs.boundingBox == rhs.boundingBox && lhs.imageID == rhs.imageID && lhs.string == rhs.string)
 	}
 	
 	let id: String
@@ -27,13 +27,13 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 		
 	let boundingBox: CGRect
 	
-	var subElements: [SubElement] = []
+//	var subElements: [SubElement] = []
 	
-	var subStringsConc: String {
-		subElements.map({ $0.string }).joined()
-	}
+//	var subStringsConc: String {
+//		subElements.map({ $0.string }).joined()
+//	}
 	
-	init(imageID: String, observation: VNRecognizedTextObservation, subElements: [SubElement]) {
+	init(imageID: String, observation: VNRecognizedTextObservation) {//, subElements: [SubElement]) {
 		let candidate: VNRecognizedText = observation.topCandidates(1)[0]
 		
 		self.id = observation.uuid.uuidString
@@ -41,40 +41,42 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 		
 		self.string = candidate.string
 
-		var bottomLeft = observation.bottomLeft
-		var bottomRight = observation.bottomRight
-		var topRight = observation.topRight
-		var topLeft = observation.topLeft
+		self.bottomLeft = observation.bottomLeft
+		self.bottomRight = observation.bottomRight
+		self.topRight = observation.topRight
+		self.topLeft = observation.topLeft
 		
-		if let first = subElements.first, first.string == candidate.string {
-			self.subElements = first.subElements
-			
-		}else {
-			self.subElements = subElements
-		}
+//		if let first = subElements.first, first.string == candidate.string {
+//			self.subElements = first.subElements
+//
+//		}else {
+//			self.subElements = subElements
+//		}
 		
-		let rect = CGRect(x: topLeft.x, y: topLeft.y, width: topRight.x - topLeft.x, height: bottomRight.y - topRight.y)
+		let rect = CGRect(x: topLeft.x, y: topLeft.y, width: topRight.x - bottomLeft.x, height: bottomRight.y - topLeft.y)
 		
-		if rect.height > 0 && rect.width > 0 {
+//		if rect.height > 0 && rect.width > 0 {
 			self.boundingBox = rect
-		}else {
-			let minX = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.minX)})
-			let minY = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.minY)})
-			
-			let maxX = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.maxX)})
-			let maxY = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.maxY)})
-			
-			let r = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
-			self.boundingBox = r
-			bottomLeft = CGPoint(x: r.minX, y: maxY)
-			bottomRight = CGPoint(x: r.maxX, y: maxY)
-			topLeft = CGPoint(x: r.minX, y: minY)
-			topRight = CGPoint(x: r.maxX, y: minY)
-		}
+//		}
+//		else {
+//			let minX = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.minX)})
+//			let minY = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.minY)})
+//
+//			let maxX = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.maxX)})
+//			let maxY = self.subElements.reduce(into: CGFloat(0), { $0 = min($0, $1.boundingBox.maxY)})
+//
+//			let r = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+//			self.boundingBox = r
+//			bottomLeft = CGPoint(x: r.minX, y: maxY)
+//			bottomRight = CGPoint(x: r.maxX, y: maxY)
+//			topLeft = CGPoint(x: r.minX, y: minY)
+//			topRight = CGPoint(x: r.maxX, y: minY)
+//		}
 		
-		self.bottomLeft = bottomLeft; self.bottomRight = bottomRight; self.topLeft = topLeft; self.topRight = topRight
+//		self.bottomLeft = bottomLeft; self.bottomRight = bottomRight; self.topLeft = topLeft; self.topRight = topRight
 	}
 	
+	///Not sure if correct
 	func relativeBoundingBox(forImageFrame frame: CGRect) -> CGRect {
 		let r = CGRect(x: (topLeft.x * frame.width) + frame.minX, y: ((1 - topLeft.y) * frame.height) + frame.minY, width: boundingBox.width * frame.width, height: boundingBox.height * frame.height)
 //		print("Relative bounding box: \(r)")
@@ -88,7 +90,7 @@ struct VisionRecognizedTextResult: Identifiable, Codable, Equatable {
 	}
 	
 }
-
+///Unused, for now
 extension VisionRecognizedTextResult {
 	struct SubElement: Identifiable, Codable, Equatable, Hashable {
 		func hash(into hasher: inout Hasher) {

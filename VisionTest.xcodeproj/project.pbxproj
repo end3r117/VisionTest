@@ -3,16 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4200DC572516D6B4002C3137 /* String+BoundingRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4200DC562516D6B4002C3137 /* String+BoundingRect.swift */; };
-		4207232B2514C131009FFCA6 /* TextElementsProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4207232A2514C131009FFCA6 /* TextElementsProcessor.swift */; };
 		42694F672516C78600495AE6 /* ElementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42694F662516C78600495AE6 /* ElementView.swift */; };
 		42856C742512E6AF00D953CB /* AnchorPreferenceKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42856C732512E6AF00D953CB /* AnchorPreferenceKey.swift */; };
-		42856C782512F86F00D953CB /* SubElementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42856C772512F86F00D953CB /* SubElementView.swift */; };
-		42856CB0251320F500D953CB /* GoogleMLTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42856C892513029500D953CB /* GoogleMLTester.swift */; };
 		42856CB32513457300D953CB /* UIFont+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42856CB22513457300D953CB /* UIFont+.swift */; };
 		4294B4552511DE3700EFD7BC /* VisionTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4294B4542511DE3700EFD7BC /* VisionTestApp.swift */; };
 		4294B4572511DE3700EFD7BC /* AppContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4294B4562511DE3700EFD7BC /* AppContainerView.swift */; };
@@ -133,9 +130,9 @@
 			isa = PBXGroup;
 			children = (
 				4294B46A2512BABD00EFD7BC /* TextRecognitionView.swift */,
-				42856C772512F86F00D953CB /* SubElementView.swift */,
 				42694F662516C78600495AE6 /* ElementView.swift */,
 				42E011F72519A470004538C7 /* WordView.swift */,
+				42856C772512F86F00D953CB /* SubElementView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -223,8 +220,6 @@
 				4294B44D2511DE3700EFD7BC /* Sources */,
 				4294B44E2511DE3700EFD7BC /* Frameworks */,
 				4294B44F2511DE3700EFD7BC /* Resources */,
-				66F5AE5C4053645C8C2D7603 /* [CP] Embed Pods Frameworks */,
-				0BFD2BD88034A5C5DE5A236E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -280,40 +275,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0BFD2BD88034A5C5DE5A236E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		66F5AE5C4053645C8C2D7603 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VisionTest/Pods-VisionTest-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		76AAFE37A849E0FA180B2C6E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -345,10 +306,8 @@
 			files = (
 				42856CB32513457300D953CB /* UIFont+.swift in Sources */,
 				42694F672516C78600495AE6 /* ElementView.swift in Sources */,
-				42856CB0251320F500D953CB /* GoogleMLTester.swift in Sources */,
 				4294B46D2512BB2600EFD7BC /* VisionViewModel.swift in Sources */,
 				42BF78042512C7E6007A2987 /* Identified.swift in Sources */,
-				4207232B2514C131009FFCA6 /* TextElementsProcessor.swift in Sources */,
 				4294B4572511DE3700EFD7BC /* AppContainerView.swift in Sources */,
 				42BF78352512D579007A2987 /* VisionRecognizedTextResult.swift in Sources */,
 				4200DC572516D6B4002C3137 /* String+BoundingRect.swift in Sources */,
@@ -357,7 +316,6 @@
 				42E011F82519A470004538C7 /* WordView.swift in Sources */,
 				4294B4552511DE3700EFD7BC /* VisionTestApp.swift in Sources */,
 				42856C742512E6AF00D953CB /* AnchorPreferenceKey.swift in Sources */,
-				42856C782512F86F00D953CB /* SubElementView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

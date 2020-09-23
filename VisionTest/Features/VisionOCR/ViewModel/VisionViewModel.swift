@@ -10,18 +10,39 @@ import SwiftUI
 import Vision
 
 class VisionViewModel: ObservableObject {
-	
+	enum TestImages: String {
+		case redditOCR = "RedditOCR", quickFox = "TestText", examplePost = "ExamplePost"
+		
+		var image: UIImage? {
+			UIImage(named: self.rawValue)
+		}
+		
+		mutating func toggle() -> VisionProcessedImage {
+			switch self {
+			case .redditOCR:
+				self = .examplePost
+				return VisionProcessedImage(withImageNamed: "ExamplePost", processDate: nil, textDisplayResults: [])!
+			case .examplePost:
+				self = .quickFox
+				return VisionProcessedImage(withImageNamed: "TestText", processDate: nil, textDisplayResults: [])!
+			case .quickFox:
+				self = .redditOCR
+				return VisionProcessedImage(withImageNamed: "RedditOCR", processDate: nil, textDisplayResults: [])!
+			}
+		}
+	}
 	//Google
-	@Published var googleOCRResult: OCRResult? = nil
+//	@Published var googleOCRResult: OCRResult? = nil
 	
 	//Apple Vision
+	private var currentImage: TestImages = .examplePost
 	@Published var vpImage: VisionProcessedImage?
 	@Published var visionResults: [VisionRecognizedTextResult] = []
 	@Published private var imageRequestHandler: VNImageRequestHandler?
 	@Published var imageProcessed: Bool = false
 	@Published var processTime: String = ""
 	@Published var processingProgress: Double = 0
-	private var startTime: Date?
+	@Published var startTime: Date?
 	private var processTimeMilliseconds: TimeInterval? {
 		didSet {
 			if let ms = processTimeMilliseconds {
@@ -65,30 +86,37 @@ class VisionViewModel: ObservableObject {
 		vpImage?.clear()
 		progressHandler = nil
 		completionHandler = nil
+		imageProcessed = false
 		processTimeMilliseconds = nil
 		processTime = ""
 		processingProgress = 0
 		startTime = nil
 		
-		googleOCRResult = nil
+//		googleOCRResult = nil
 		visionResults.removeAll()
 		vpImage = nil
 		
 	}
 	
+	func changePic() {
+		self.cleanUp()
+		print("Changing from \(currentImage.rawValue)")
+		self.vpImage = currentImage.toggle()
+		print("to \(currentImage.rawValue)")
+	}
+	
 	func process(using recognizer: Recognizer, image: VisionProcessedImage? = nil, fast: Bool = true) {
 		switch recognizer {
 		case .appleVision: processWithAppleVision(image: image, type: fast ? .fast : .accurate)
-		case .googleVision: processWithGoogle()
+//		case .googleVision: processWithGoogle()
+		default: break
 		}
 	}
 	
 	private func processWithAppleVision(image: VisionProcessedImage? = nil, type: VNRequestTextRecognitionLevel = .fast) {
 		cleanUp()
-		
-		self.vpImage = image ?? VisionProcessedImage(withImageNamed: "RedditOCR", processDate: nil, textDisplayResults: [])
-//		self.vpImage = image ?? VisionProcessedImage(withImageNamed: "ExamplePost", processDate: nil, textDisplayResults: [])
-//		self.vpImage = image ?? VisionProcessedImage(withImageNamed: "TestText", processDate: nil, textDisplayResults: [])
+		if vpImage == nil { vpImage = image ?? VisionProcessedImage(withImageNamed: currentImage.rawValue) }
+		guard vpImage != nil else { return }
 		
 		imageSub = $vpImage
 			.receive(on: DispatchQueue.main)
@@ -118,8 +146,9 @@ class VisionViewModel: ObservableObject {
 //					let textRectsRequest = VNDetectTextRectanglesRequest(completionHandler: comp)
 //					textRectsRequest.reportCharacterBoxes = true
 					
-					
-					self.startTime = Date()
+					DispatchQueue.main.async {
+						self.startTime = Date()
+					}
 //					try requestHandler?.perform([textRequest, textRectsRequest])
 					try requestHandler?.perform([textRequest])
 				}catch {
@@ -129,32 +158,32 @@ class VisionViewModel: ObservableObject {
 			})
 	}
 	
-	private func processWithGoogle() {
-		if vpImage == nil { vpImage = VisionProcessedImage(withImageNamed: "ExamplePost") }
-		guard let name = vpImage?.imageName, let img = UIImage(named: name) else { return }
-		
-		cleanUp()
-		
-		let googleMLTester = GoogleMLTester(image: img)
-		
-		requestSub = googleMLTester.beginProcessing()
-			.receive(on: DispatchQueue.main)
-			.sink(receiveCompletion: {[weak self] (completion) in
-				guard let self = self else { return }
-				switch completion {
-				case .failure(let error):
-					self.errorAlert = Identified(Alert(title: Text("Error"), message: Text(error.stringDescription), dismissButton: .default(Text("Okay"))))
-				case .finished: break
-				}
-			}, receiveValue: {[weak self] (val) in
-//				print(val)
-				self?.imageProcessed = true
-				self?.googleOCRResult = val
-				self?.processingProgress = 1
-				self?.processTimeMilliseconds = val.processingTime
-			})
-		
-	}
+//	private func processWithGoogle() {
+//		if vpImage == nil { vpImage = VisionProcessedImage(withImageNamed: "ExamplePost") }
+//		guard let name = vpImage?.imageName, let img = UIImage(named: name) else { return }
+//
+//		cleanUp()
+//
+////		let googleMLTester = GoogleMLTester(image: img)
+//
+//		requestSub = googleMLTester.beginProcessing()
+//			.receive(on: DispatchQueue.main)
+//			.sink(receiveCompletion: {[weak self] (completion) in
+//				guard let self = self else { return }
+//				switch completion {
+//				case .failure(let error):
+//					self.errorAlert = Identified(Alert(title: Text("Error"), message: Text(error.stringDescription), dismissButton: .default(Text("Okay"))))
+//				case .finished: break
+//				}
+//			}, receiveValue: {[weak self] (val) in
+////				print(val)
+//				self?.imageProcessed = true
+//				self?.googleOCRResult = val
+//				self?.processingProgress = 1
+//				self?.processTimeMilliseconds = val.processingTime
+//			})
+//
+//	}
 	
 	static private func getRectForWord(inTextObservation observation: VNTextObservation) -> CGRect {
 		guard let boxes = observation.characterBoxes else {
@@ -206,29 +235,32 @@ class VisionViewModel: ObservableObject {
 	private var visionSub: AnyCancellable?
 	
 	private func buildRequest(_ cgImage: CGImage) {
-		visionSub = Publishers.CombineLatest($textResults, $rectResults)
+//		visionSub = Publishers.CombineLatest($textResults, $rectResults)
+		visionSub = $textResults
 			.receive(on: DispatchQueue.global(qos: .userInitiated))
-			.compactMap({ output -> ([VNRecognizedTextObservation], [VNTextObservation])? in
-				if let text = output.0, let rect = output.1 {
-					return (text, rect)
-				}
-				return nil
-			})
-			.sink(receiveValue: {[weak self] (textResults, rectResults) in
+			.compactMap({ $0 })
+//			.compactMap({ output -> ([VNRecognizedTextObservation], [VNTextObservation])? in
+//				if let text = output.0, let rect = output.1 {
+//					return (text, rect)
+//				}
+//				return nil
+//			})
+//			.sink(receiveValue: { [weak self] (textResults, rectResults) in
+			.sink(receiveValue: { [weak self] textResults in
 				guard let self = self, let image = self.vpImage else { return }
 				
 				
 				//	print("Results: \(results)")
-				var wordRects: [(word: CGRect, letters: [CGRect])] = []
-				rectResults.forEach({ obs in
-					let word = obs.boundingBox//Self.getRectForWord(inTextObservation: obs)
-					let chars = Self.getRectsForChars(inTextObservation: obs)//.filter({ word.contains($0) })
-					wordRects.append((word, chars))
-				})
-				DispatchQueue.main.async {
-					self.wordGroups = wordRects
-					
-				}
+//				var wordRects: [(word: CGRect, letters: [CGRect])] = []
+//				rectResults.forEach({ obs in
+//					let word = obs.boundingBox//Self.getRectForWord(inTextObservation: obs)
+//					let chars = Self.getRectsForChars(inTextObservation: obs)//.filter({ word.contains($0) })
+//					wordRects.append((word, chars))
+//				})
+//				DispatchQueue.main.async {
+//					self.wordGroups = wordRects
+//
+//				}
 				
 				// print("Word rects: \(wordRects)")
 				
@@ -281,8 +313,8 @@ class VisionViewModel: ObservableObject {
 						textDisplayResults.append(
 							VisionRecognizedTextResult(
 								imageID: image.id,
-								observation: obs,
-								subElements: [])
+								observation: obs)//,
+//								subElements: [])
 						)
 //					}
 				})
@@ -306,13 +338,13 @@ class VisionViewModel: ObservableObject {
 				if self.vpImage != nil {
 					if let results = request.results {
 						let textResults = results.compactMap({ $0 as? VNRecognizedTextObservation })
-						let rectResults = results.compactMap({ $0 as? VNTextObservation })
+//						let rectResults = results.compactMap({ $0 as? VNTextObservation })
 						
 						if !textResults.isEmpty {
 							self.textResults = textResults
 						}
 //						if !rectResults.isEmpty {
-							self.rectResults = rectResults
+//							self.rectResults = rectResults
 //						}
 					}
 				}

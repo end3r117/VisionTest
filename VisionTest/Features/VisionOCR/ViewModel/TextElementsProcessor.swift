@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-
+///Unused
 class TextElementsProcessor: ObservableObject {
 	typealias SubElement = VisionRecognizedTextResult.SubElement
 	@Published private(set) var readyToProcess: Bool = true
