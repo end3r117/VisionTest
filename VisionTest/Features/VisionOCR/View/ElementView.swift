@@ -220,7 +220,7 @@ struct ElementView: View {
 //				.background(Color(.systemBackground))
 //				, alignment: .bottom)
 //			.frame(width: geo.size.width, height: geo.size.height)
-//			.border(Color.red)
+			.border(Color.blue)
 	}
 
 		

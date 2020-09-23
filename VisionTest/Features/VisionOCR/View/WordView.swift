@@ -22,6 +22,7 @@ struct WordView: View {
 			.font(Font(font))
 			.foregroundColor(.clear)
 			.frame(minWidth: size.width, maxHeight: size.height)
+			.border(Color.purple)
 			.onChange(of: dragLocation, perform: { value in
 				guard value != .zero else { return }
 				let h = word.boundingRect.contains(value)
